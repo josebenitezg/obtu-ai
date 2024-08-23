@@ -1,20 +1,22 @@
 import replicate
 import os
 from huggingface_hub import create_repo
+from database import create_lora_models
 
 REPLICATE_OWNER = "josebenitezg"
 
-def lora_pipeline(zip_path, model_name, trigger_word="TOK", steps=1000, lora_rank=16, batch_size=1, autocaption=True, learning_rate=0.0004):
+def lora_pipeline(user_id, zip_path, model_name, trigger_word="TOK", steps=1000, lora_rank=16, batch_size=1, autocaption=True, learning_rate=0.0004):
     print(f'Creating dataset for {model_name}')
-    repo_name = f"joselobenitezg/flux-dev-{model_name}"
-    create_repo(repo_name, repo_type='model')
+    hf_repo_name = f"joselobenitezg/flux-dev-{model_name}"
+    replicate_repo_name = f"josebenitezg/flux-dev-{model_name}"
+    create_repo(hf_repo_name, repo_type='model')
 
     lora_name = f"flux-dev-{model_name}"
     
     model = replicate.models.create(
         owner=REPLICATE_OWNER,
         name=lora_name,
-        visibility="public",  # or "private" if you prefer
+        visibility="private",  # or "private" if you prefer
         hardware="gpu-t4",  # Replicate will override this for fine-tuned models
         description="A fine-tuned FLUX.1 model"
     )
@@ -37,10 +39,14 @@ def lora_pipeline(zip_path, model_name, trigger_word="TOK", steps=1000, lora_ran
             "trigger_word": trigger_word,
             "learning_rate": learning_rate,
             "hf_token": os.getenv('HF_TOKEN'),  # optional
-            "hf_repo_id": repo_name,  # optional
+            "hf_repo_id": hf_repo_name,  # optional
         },
         destination=f"{model.owner}/{model.name}"
     )
 
+    print(f"training: {training.keys()}")
     print(f"Training started: {training.status}")
     print(f"Training URL: https://replicate.com/p/{training.id}")
+    print(f"Creating model in Database")
+    training_url = f"https://replicate.com/p/{training.id}"
+    create_lora_models(user_id, replicate_repo_name, trigger_word, steps, lora_rank, batch_size, learning_rate, hf_repo_name, training_url)

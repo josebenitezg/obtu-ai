@@ -5,13 +5,12 @@ import json
 import zipfile
 from pathlib import Path
 
-from database import get_user_credits, update_user_credits, get_lora_models_info
+from database import get_user_credits, update_user_credits, get_lora_models_info, get_user_lora_models
 from services.image_generation import generate_image
 from services.train_lora import lora_pipeline
 from utils.image_utils import url_to_pil_image
 
 lora_models = get_lora_models_info()
-
 
 if not isinstance(lora_models, list):
     raise ValueError("Expected loras_models to be a list of dictionaries.")
@@ -37,8 +36,20 @@ if main_header_path.is_file():
     with main_header_path.open() as file:
         main_header = file.read()
 
-def update_selection(evt: gr.SelectData, width, height):
-    selected_lora = lora_models[evt.index]
+def load_user_models(request: gr.Request):
+    user = request.session.get('user')
+    print(user)
+    if user:
+        user_models = get_user_lora_models(user['id'])
+        if user_models:
+            return [(item.get("image_url", "assets/logo.jpg"), item["lora_name"]) for item in user_models]
+    return []
+
+def update_selection(evt: gr.SelectData, gallery_type: str, width, height):
+    if gallery_type == "user":
+        selected_lora = {"lora_name": "custom", "trigger_word": "custom"}
+    else:
+        selected_lora = lora_models[evt.index]
     new_placeholder = f"Ingresa un prompt para tu modelo {selected_lora['lora_name']}"
     trigger_word = selected_lora["trigger_word"]
     updated_text = f"#### Palabra clave: {trigger_word} ✨"
@@ -48,13 +59,18 @@ def update_selection(evt: gr.SelectData, width, height):
             width, height = 768, 1024
         elif selected_lora["aspect"] == "landscape":
             width, height = 1024, 768
-    
-    return gr.update(placeholder=new_placeholder), updated_text, evt.index, width, height
 
-def compress_and_train(files, model_name, trigger_word, train_steps, lora_rank, batch_size, learning_rate):
+    return gr.update(placeholder=new_placeholder), updated_text, evt.index, width, height, gallery_type
+
+def compress_and_train(request: gr.Request, files, model_name, trigger_word, train_steps, lora_rank, batch_size, learning_rate):
     if not files:
-        return "No images uploaded. Please upload images before training."
+        return "No hay imágenes. Sube algunas imágenes para poder entrenar."
+    
+    user = request.session.get('user')
+    if not user:
+        raise gr.Error("User not authenticated. Please log in.")
 
+    user_id = user['id']
     # Create a directory in the user's home folder
     output_dir = os.path.expanduser("~/gradio_training_data")
     os.makedirs(output_dir, exist_ok=True)
@@ -72,7 +88,8 @@ def compress_and_train(files, model_name, trigger_word, train_steps, lora_rank, 
         
     print(f'[INFO] Procesando {trigger_word}')
     # Now call the train_lora function with the zip file path
-    result = lora_pipeline(zip_path, 
+    result = lora_pipeline(user_id,
+                            zip_path, 
                             model_name, 
                             trigger_word=trigger_word, 
                             steps=train_steps, 
@@ -81,19 +98,39 @@ def compress_and_train(files, model_name, trigger_word, train_steps, lora_rank, 
                             autocaption=True, 
                             learning_rate=learning_rate)
     
-    return f"{result}\n\nZip file saved at: {zip_path}"
+    return gr.Info("Tu modelo esta entrenando, En unos 20 minutos estará listo para que lo pruebes en 'Generación'.")
             
-def run_lora(request: gr.Request, prompt, cfg_scale, steps, selected_index, randomize_seed, width, height, lora_scale, progress=gr.Progress(track_tqdm=True)):
+def run_lora(request: gr.Request, prompt, cfg_scale, steps, selected_index, selected_gallery, width, height, lora_scale, progress=gr.Progress(track_tqdm=True)):
     user = request.session.get('user')
     if not user:
         raise gr.Error("User not authenticated. Please log in.")
-    
+    lora_models = get_user_lora_models(user['id'])
+    print(f'Selected gallery: {selected_gallery}')
+    if selected_gallery == "user":
+        lora_models = get_user_lora_models(user['id'])
+        print('Using user models')
+    else:  # public
+        lora_models = get_lora_models_info()
+        print('Using public models')
+    print(f'Selected index: {selected_index}')
+    if selected_index is None:
+        selected_lora = None
+    else:
+        selected_lora = lora_models[selected_index]
+
     generation_credits, _ = get_user_credits(user['id'])
-    
+    if selected_lora:
+        print(f"Selected Lora: {selected_lora['lora_name']}")
+        model_name = selected_lora['lora_name']
+        use_default = False
+    else:
+        model_name = "black-forest-labs/flux-pro"
+        print(f"Using default Lora: {model_name}")
+        use_default = True
     if generation_credits <= 0:
         raise gr.Error("Ya no tienes creditos disponibles. Compra para continuar.")
     
-    image_url = generate_image(prompt, steps, cfg_scale, width, height, lora_scale, progress)
+    image_url = generate_image(model_name, prompt, steps, cfg_scale, width, height, lora_scale, progress, use_default)
     image = url_to_pil_image(image_url)
     
     # Update user's credits
@@ -193,7 +230,7 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
                             columns=3,
                             elem_id="gallery"
                         )
-                    
+            gallery_type = gr.State("Public")
 
             with gr.Accordion("Configuracion Avanzada", open=False):
                 with gr.Row():
@@ -208,14 +245,19 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
 
             gallery.select(
                 update_selection,
-                inputs=[width, height],
-                outputs=[prompt, selected_info, selected_index, width, height]
+                inputs=[gr.State("public"), width, height],
+                outputs=[prompt, selected_info, selected_index, width, height, gallery_type]
             )
-
+            
+            user_model_gallery.select(
+                update_selection,
+                inputs=[gr.State("user"), width, height],
+                outputs=[prompt, selected_info, selected_index, width, height, gallery_type]
+            )
             gr.on(
                 triggers=[generate_button.click, prompt.submit],
                 fn=run_lora,
-                inputs=[prompt, cfg_scale, steps, selected_index, randomize_seed, width, height, lora_scale],
+                inputs=[prompt, cfg_scale, steps, selected_index, gallery_type, width, height, lora_scale],
                 outputs=[result, generation_credits_display]
             )
 
@@ -237,8 +279,6 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
                 learning_rate = gr.Number(label='learning_rate', value=0.0004)
                 training_status = gr.Textbox(label="Training Status")
 
-
-
             train_button.click(
                 compress_and_train,
                 inputs=[train_dataset, model_name, trigger_word, train_steps, lora_rank, batch_size, learning_rate],
@@ -249,14 +289,14 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
         #main_demo.load(greet, None, title)
         #main_demo.load(greet, None, greetings)
         #main_demo.load((greet, display_credits), None, [greetings, generation_credits_display, train_credits_display])
+        main_demo.load(load_user_models, None, user_model_gallery)
         main_demo.load(load_greet_and_credits, None, [greetings, generation_credits_display, train_credits_display])
 
 
 
 # TODO:
 '''
-- Galeria Modelos Propios (si existe alguno del user, si no, mostrar un mensaje para entrenar)
-- Galeria Modelos Open Source (accordion)
+- resolver mostrar bien los nombres de los modelos en la galeria
 - Training con creditos.
 - Stripe(?)
 - Mejorar boton de login/logout

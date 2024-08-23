@@ -35,7 +35,8 @@ def get_or_create_user(google_id, email, name, given_name, profile_picture):
         return user.data[0]
     
 def get_lora_models_info():
-    lora_models = supabase.table("lora_models").select("*").execute()
+    lora_models = supabase.table("lora_models").select("*").is_("user_id", None).execute()
+    
     return lora_models.data
 
 def get_user_by_id(user_id):
@@ -43,3 +44,24 @@ def get_user_by_id(user_id):
     if user.data:
         return user.data[0]
     return None
+
+def create_lora_models(user_id, replicate_repo_name, trigger_word, steps, lora_rank, batch_size, learning_rate, hf_repo_name, training_url):
+    # create a jsonb from trigger_word, train_steps, lora_rank, batch_size, learning_rate values
+    model_config = {
+        "train_steps": steps,
+        "lora_rank": lora_rank,
+        "batch_size": batch_size,
+        "learning_rate": learning_rate
+    }
+    result = supabase.table("lora_models").insert({
+        "user_id": user_id,
+        "trigger_word": trigger_word,
+        "lora_name": replicate_repo_name,
+        "hf_repo": hf_repo_name,
+        "configs": model_config,
+        "training_url": training_url
+    }).execute()
+    
+def get_user_lora_models(user_id):
+    user_models = supabase.table("lora_models").select("*").eq("user_id", user_id).execute()
+    return user_models.data
