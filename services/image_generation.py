@@ -19,7 +19,12 @@ def generate_image(model_name, prompt, steps, cfg_scale, width, height, lora_sca
             }
         )
     else:
-        model_name = model_name.lower().replace(' ', '_')
+        # check if the model has a version. the model is something like model='user/model-name:version' but sometimes we just got model='user/model-name' in this case, let get and add the model version
+        if ':' not in model_name:
+            model_version = replicate.models.get(model_name).latest_version.id
+            print(f"Model version: {model_version}")
+            model_name = f"{model_name}:{model_version}"
+            
         img_url = replicate.run(
             model_name,
             input={

@@ -7,6 +7,7 @@ REPLICATE_OWNER = "josebenitezg"
 
 def lora_pipeline(user_id, zip_path, model_name, trigger_word="TOK", steps=1000, lora_rank=16, batch_size=1, autocaption=True, learning_rate=0.0004):
     print(f'Creating dataset for {model_name}')
+    model_name = model_name.lower().replace(' ', '_')
     hf_repo_name = f"joselobenitezg/flux-dev-{model_name}"
     replicate_repo_name = f"josebenitezg/flux-dev-{model_name}"
     create_repo(hf_repo_name, repo_type='model')
