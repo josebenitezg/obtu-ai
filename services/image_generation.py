@@ -19,6 +19,7 @@ def generate_image(model_name, prompt, steps, cfg_scale, width, height, lora_sca
             }
         )
     else:
+        model_name = model_name.lower().replace(' ', '_')
         img_url = replicate.run(
             model_name,
             input={

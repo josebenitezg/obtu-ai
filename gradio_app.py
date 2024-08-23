@@ -67,6 +67,12 @@ def compress_and_train(request: gr.Request, files, model_name, trigger_word, tra
         return "No hay imágenes. Sube algunas imágenes para poder entrenar."
     
     user = request.session.get('user')
+    
+    _, training_credits = get_user_credits(user['id'])
+    
+    if training_credits <= 0:
+        raise gr.Error("Ya no tienes creditos disponibles. Compra para continuar.")
+    
     if not user:
         raise gr.Error("User not authenticated. Please log in.")
 
@@ -98,7 +104,14 @@ def compress_and_train(request: gr.Request, files, model_name, trigger_word, tra
                             autocaption=True, 
                             learning_rate=learning_rate)
     
-    return gr.Info("Tu modelo esta entrenando, En unos 20 minutos estará listo para que lo pruebes en 'Generación'.")
+    new_training_credits = training_credits - 1
+    update_user_credits(user['id'], user['generation_credits'], new_training_credits)
+    
+    # Update session data
+    user['training_credits'] = new_training_credits
+    request.session['user'] = user
+    
+    return gr.Info("Tu modelo esta entrenando, En unos 20 minutos estará listo para que lo pruebes en 'Generación'."), new_training_credits
             
 def run_lora(request: gr.Request, prompt, cfg_scale, steps, selected_index, selected_gallery, width, height, lora_scale, progress=gr.Progress(track_tqdm=True)):
     user = request.session.get('user')
@@ -278,11 +291,19 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
                 batch_size = gr.Number(label='batch_size', value=1)
                 learning_rate = gr.Number(label='learning_rate', value=0.0004)
                 training_status = gr.Textbox(label="Training Status")
-
+            
+            def fake_train(train_dataset, model_name, trigger_word, train_steps, lora_rank, batch_size, learning_rate):
+                print(f'fake training for test')
+                new_training_credits = 0
+                if new_training_credits <= 0:
+                    raise gr.Error("Ya no tienes creditos disponibles. Compra para continuar.")
+                return gr.Info("Tu modelo esta entrenando, En unos 20 minutos estará listo para que lo pruebes en 'Generación'."), new_training_credits
+                
             train_button.click(
-                compress_and_train,
+                #compress_and_train,
+                fake_train,
                 inputs=[train_dataset, model_name, trigger_word, train_steps, lora_rank, batch_size, learning_rate],
-                outputs=training_status
+                outputs=[training_status,train_credits_display]
             )
                 
                 
