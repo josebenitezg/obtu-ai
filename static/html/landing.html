@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ObtuAI - Creación Visual con IA</title>
+    <style>
+        :root {
+            --background-color: #0f0f0f;
+            --text-color: #ffffff;
+            --accent-color: #bb86fc;
+            --surface-color: #1e1e1e;
+            --border-radius: 20px;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto;
+            overflow: hidden;
+            padding: 0 20px;
+        }
+        header {
+            background: var(--surface-color);
+            padding: 20px 0;
+            position: relative;
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        #google-btn-container {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+        }
+        .hero {
+            background: url('https://news.ubc.ca/wp-content/uploads/2023/08/AdobeStock_559145847.jpeg') no-repeat center center/cover;
+            height: 60vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-top: 20px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        .hero-content {
+            background: rgba(0,0,0,0.7);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            max-width: 600px;
+        }
+        .hero-content h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.5em;
+        }
+        .features {
+            padding: 40px 0;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        .feature {
+            background: var(--surface-color);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+        .testimonials {
+            background: var(--surface-color);
+            padding: 40px 0;
+            border-radius: var(--border-radius);
+            margin-top: 40px;
+        }
+        .testimonial {
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            margin-top: 30px;
+            border-radius: var(--border-radius);
+            transition: transform 0.3s ease;
+        }
+        .testimonial:hover {
+            transform: scale(1.03);
+        }
+        footer {
+            background: var(--surface-color);
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+        }
+        @media(max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            #google-btn-container {
+                position: static;
+                transform: none;
+                margin-top: 20px;
+            }
+            .hero-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🎨 ObtuAI</div>
+                <div id="google-btn-container">
+                    <!-- El botón será insertado aquí por Gradio -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>🚀 Bienvenido al Futuro de la Creación Visual</h1>
+                <p>Crea imágenes con IA en segundos. ¡Escribe tu idea y mira cómo se convierte en arte!</p>
+            </div>
+        </section>
+
+        <section class="features">
+            <h2>🌟 Descubre el Poder de la Generación de Imágenes por IA</h2>
+            <div class="feature-grid">
+                <div class="feature">
+                    <h3>Personaliza</h3>
+                    <p>Alimenta tu modelo con tus propias imágenes y estilos.</p>
+                </div>
+                <div class="feature">
+                    <h3>Entrena</h3>
+                    <p>Nuestra IA aprende de tus preferencias.</p>
+                </div>
+                <div class="feature">
+                    <h3>Crea</h3>
+                    <p>Genera imágenes que reflejen tu visión única.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="testimonials">
+            <div class="container">
+                <h2>💬 Lo Que Dicen Nuestros Usuarios</h2>
+                <div class="testimonial">
+                    <p>"ObtuAI ha revolucionado mi proceso creativo. ¡Ahora puedo visualizar mis ideas más locas en minutos!"</p>
+                    <p><strong>- Ana, Diseñadora Gráfica</strong></p>
+                </div>
+                <div class="testimonial">
+                    <p>"Entrenar mi propio modelo fue sorprendentemente fácil. Ahora hago fotografías mías y de mis clientes en segundos."</p>
+                    <p><strong>- Carlos, Fotógrafo Profesional</strong></p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>ObtuAI - Tus ideas locas en píxeles con AI.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ObtuAI Header</title>
+    <style>
+        :root {
+            --background-color: #4337C9;
+            --text-color: #ffffff;
+            --accent-color: #bb86fc;
+            --surface-color:#4337C9;
+            --border-radius: 20px;
+        }
+        body {
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: var(--surface-color);
+            padding: 15px 20px;
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .logo {
+            background: rgba(187, 134, 252, 0.1);
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+        }
+        .logo h1 {
+            font-size: 2em;
+            color: var(--accent-color);
+            margin: 0;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+        }
+        .badge {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 25px;
+            font-size: 0.8em;
+            margin-left: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+       
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+                <h1>Obtu AI 📸</h1>
+            <div class="status">
+                <lord-icon
+                    src="https://cdn.lordicon.com/jgjfuggm.json"
+                    trigger="loop"
+                    state="loop-cycle"
+                    colors="primary:#4be1ec,secondary:#4030e8"
+                    style="width:50px;height:50px">
+                </lord-icon>
+                <span class="badge">GPU🔥</span>
+            </div>
+        </div>
+    </header>
+</body>
+</html>

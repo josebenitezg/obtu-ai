@@ -1,0 +1,60 @@
+#gen_btn {
+    height: 100%
+}
+
+#title {
+    text-align: center
+}
+
+#title h1 {
+    font-size: 3em;
+    display: inline-flex;
+    align-items: center
+}
+
+#title img {
+    width: 100px;
+    margin-right: 0.5em
+}
+
+#gallery .grid-wrap {
+    height: 10vh
+}
+
+/* Estilo para el contenedor del botón */
+#logout-btn-container.svelte-vt1mxs.gap {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    display: flex;
+    justify-content: flex-end;
+    width: auto;
+}
+
+/* Estilo para el botón de logout */
+#logout_btn.lg.secondary.svelte-cmf5ev {
+    width: auto;
+    min-width: 80px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin-left: auto; /* Empuja el botón hacia la derecha */
+}
+
+#logout_btn.lg.secondary.svelte-cmf5ev:hover {
+    background-color: #d32f2f;
+}
+
+/* Ajuste del layout principal si es necesario */
+.gradio-container {
+    position: relative;
+}
