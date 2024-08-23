@@ -202,8 +202,7 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
 
     
     greetings = gr.Markdown("Loading user information...")
-    gr.Button("Comprar Creditos", link="/buy_credits", elem_id="buy_credits_btn")
-
+    
     selected_index = gr.State(None)
     
     with gr.Row():
@@ -211,13 +210,18 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
             generation_credits_display = gr.Number(label="Generation Credits", precision=0, interactive=False)
         with gr.Column():
             train_credits_display = gr.Number(label="Training Credits", precision=0, interactive=False)
+        with gr.Column():
+            gr.Button("Comprar Creditos 💳", link="/buy_credits")
     
 
     with gr.Tabs():
         with gr.TabItem('Generacion'):
             with gr.Row():
                 with gr.Column(scale=3):
-                    prompt = gr.Textbox(label="Prompt", lines=1, placeholder="Ingresa un prompt para empezar a crear")
+                    prompt = gr.Textbox(label="Prompt", 
+                                        lines=1, 
+                                        placeholder="Ingresa un prompt para empezar a crear", 
+                                        info='Algunos modelos publicos pueden demorar un poco más dependiendo de la disponibilidad que tengan en los servidores.')
                 with gr.Column(scale=1, elem_id="gen_column"):
                     generate_button = gr.Button("Generate", variant="primary", elem_id="gen_btn")
             
@@ -234,10 +238,10 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
                             elem_id="galley"
                         )
                         
-                    with gr.Accordion("Modelos Publicos", open=False):
+                    with gr.Accordion("Modelos Publicos"):
                         selected_info = gr.Markdown("")
                         gallery = gr.Gallery(
-                            [(item["image_url"], item["lora_name"]) for item in lora_models],
+                            [(item["image_url"], item["model_name"]) for item in lora_models],
                             label="Galeria de Modelos Publicos",
                             allow_preview=False,
                             columns=3,
