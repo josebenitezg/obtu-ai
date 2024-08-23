@@ -24,7 +24,7 @@
 /* Estilo para el contenedor del botón */
 #logout-btn-container.svelte-vt1mxs.gap {
     position: absolute;
-    top: 10px;
+    top: 115px;
     right: 10px;
     z-index: 1000;
     display: flex;
