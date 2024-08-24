@@ -18,7 +18,7 @@ static_dir = Path("./static")
 app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")
 #app.mount("/assets", StaticFiles(directory="assets", html=True), name="assets")
 
-app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, max_age=3600)
 
 app.include_router(router)
 

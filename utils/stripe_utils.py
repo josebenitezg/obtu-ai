@@ -1,10 +1,11 @@
 import stripe
-from config import STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET
-
+from config import STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, DOMAIN
+import gradio as gr
 stripe.api_key = STRIPE_API_KEY
 
 
-def create_checkout_session(amount, quantity, user_id):
+def create_checkout_session(amount, quantity, user_id, request):
+    root_url = gr.route_utils.get_root_url(request, "/", None)
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[{
@@ -18,8 +19,8 @@ def create_checkout_session(amount, quantity, user_id):
             'quantity': 1,
         }],
         mode='payment',
-        success_url='http://localhost:8000/success?session_id={CHECKOUT_SESSION_ID}&user_id=' + str(user_id),
-        cancel_url='http://localhost:8000/cancel?user_id=' + str(user_id),
+        success_url=DOMAIN + '/success?session_id={CHECKOUT_SESSION_ID}&user_id=' + str(user_id),
+        cancel_url=DOMAIN + '/cancel?user_id=' + str(user_id),
 
         client_reference_id=str(user_id),  # Add this line
     )

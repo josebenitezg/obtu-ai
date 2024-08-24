@@ -6,12 +6,18 @@ from database import get_or_create_user, update_user_credits, get_user_by_id
 from authlib.integrations.starlette_client import OAuthError
 import gradio as gr
 from utils.stripe_utils import create_checkout_session, verify_webhook, retrieve_stripe_session
+from config import DOMAIN
 
 router = APIRouter()
 
 def get_user(request: Request):
-    user = request.session.get('user')
-    return user['name'] if user else None
+    user_data = request.session.get('user')
+    if user_data:
+        # Refresh user data from the database
+        user = get_user_by_id(user_data['id'])
+        request.session['user'] = user  # Update session with fresh data
+        return user['name']
+    return None
 
 @router.get('/')
 def public(request: Request, user = Depends(get_user)):
@@ -61,7 +67,7 @@ async def buy_credits(request: Request):
     user = request.session.get('user')
     if not user:
         return {"error": "User not authenticated"}
-    session = create_checkout_session(100, 50, user['id'])  # $1 for 50 credits
+    session = create_checkout_session(100, 50, user['id'], request)  # $1 for 50 credits
     
     # Store the session ID and user ID in the session
     request.session['stripe_session_id'] = session['id']
@@ -120,30 +126,29 @@ async def payment_cancel(request: Request):
         return RedirectResponse(url='/gradio', status_code=303)
     return RedirectResponse(url='/login', status_code=303)
 
-@router.get("/success")
+@router.get('/success')
 async def payment_success(request: Request):
-    print("Payment successful")
+    print('Payment Sucess')
     stripe_session_id = request.session.get('stripe_session_id')
     user_id = request.session.get('user_id')
-    
-    print(f"Session data: stripe_session_id={stripe_session_id}, user_id={user_id}")
-    
+    print(user_id)
     if stripe_session_id and user_id:
         # Retrieve the Stripe session
         stripe_session = retrieve_stripe_session(stripe_session_id)
-        
+
         if stripe_session.get('payment_status') == 'paid':
             user = get_user_by_id(user_id)
             if user:
                 # Update the session with the latest user data
                 request.session['user'] = user
-                print(f"User session updated: {user}")
-                
+                print(f"\nUser session updated: {user}\n")
+
                 # Clear the stripe_session_id and user_id from the session
                 request.session.pop('stripe_session_id', None)
                 request.session.pop('user_id', None)
-                
-                return RedirectResponse(url='/gradio', status_code=303)
+
+                root_url = DOMAIN
+                return RedirectResponse(url=f'{root_url}/gradio/', status_code=303)
             else:
                 print(f"User not found for ID: {user_id}")
         else:

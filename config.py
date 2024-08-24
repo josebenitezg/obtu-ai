@@ -14,5 +14,7 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
+DOMAIN = 'http://127.0.0.1:7000' # 'http://127.0.0.1:7000' FOR LOCAL DEV
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
