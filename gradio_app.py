@@ -230,14 +230,6 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
                     result = gr.Image(label="Imagen Generada")
                 
                 with gr.Column(scale=3):
-                    with gr.Accordion("Tus Modelos"):
-                        user_model_gallery = gr.Gallery(
-                            label="Galeria de Modelos",
-                            allow_preview=False,
-                            columns=3,
-                            elem_id="galley"
-                        )
-                        
                     with gr.Accordion("Modelos Publicos"):
                         selected_info = gr.Markdown("")
                         gallery = gr.Gallery(
@@ -247,6 +239,15 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
                             columns=3,
                             elem_id="gallery"
                         )
+                        
+                    with gr.Accordion("Tus Modelos"):
+                        user_model_gallery = gr.Gallery(
+                            label="Galeria de Modelos",
+                            allow_preview=False,
+                            columns=3,
+                            elem_id="galley"
+                        )
+                        
             gallery_type = gr.State("Public")
 
             with gr.Accordion("Configuracion Avanzada", open=False):
