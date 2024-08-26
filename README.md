@@ -1,3 +1,27 @@
+title: Obtu AI
+emoji: 📸
+colorFrom: red
+colorTo: pink
+sdk: gradio
+sdk_version: 4.42.0
+app_file: main.py
+pinned: false
+license: mit
+models:
+  - black-forest-labs/FLUX.1-dev
+  - alvdansen/frosting_lane_flux
+  - XLabs-AI/flux-RealismLora
+  - alvdansen/softserve_anime
+  - davisbro/half_illustration
+  - Norod78/Flux_1_Dev_LoRA_Paper-Cutout-Style
+  - linoyts/yarn_art_Flux_LoRA
+  - kudzueye/Boreal
+  - XLabs-AI/flux-lora-collection
+  - martintomov/retrofuturism-flux
+  - dataautogpt3/FLUX-SyntheticAnime
+  - veryVANYA/ps1-style-flux
+  - multimodalart/flux-tarot-v1
+  - alfredplpl/flux.1-dev-modern-anime-lora
 
 # ObtuAI - AI-Powered Image Generation Platform
 
