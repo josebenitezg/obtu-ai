@@ -3,8 +3,7 @@ title: Obtu AI
 emoji: 📸
 colorFrom: red
 colorTo: pink
-sdk: gradio
-sdk_version: 4.42.0
+sdk: docker
 app_file: main.py
 pinned: false
 license: mit
