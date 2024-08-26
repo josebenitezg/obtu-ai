@@ -1,40 +1,35 @@
-import gradio as gr
-
 import os
-import json
 import zipfile
 from pathlib import Path
 
-from database import get_user_credits, update_user_credits, get_lora_models_info, get_user_lora_models
+import gradio as gr
+
+from database import (
+    get_user_credits,
+    update_user_credits,
+    get_lora_models_info,
+    get_user_lora_models
+)
+
 from services.image_generation import generate_image
 from services.train_lora import lora_pipeline
 from utils.image_utils import url_to_pil_image
+from utils.file_utils import load_file_content
 
-lora_models = get_lora_models_info()
-
-if not isinstance(lora_models, list):
+LORA_MODELS = get_lora_models_info()
+if not isinstance(LORA_MODELS, list):
     raise ValueError("Expected loras_models to be a list of dictionaries.")
 
-login_css_path = Path(__file__).parent / 'static/css/login.css'
-main_css_path = Path(__file__).parent / 'static/css/main.css'
-landing_html_path = Path(__file__).parent / 'static/html/landing.html'
-main_header_path = Path(__file__).parent / 'static/html/main_header.html'
+BASE_DIR = Path(__file__).parent
+LOGIN_CSS_PATH = BASE_DIR / 'static/css/login.css'
+MAIN_CSS_PATH = BASE_DIR / 'static/css/main.css'
+LANDING_HTML_PATH = BASE_DIR / 'static/html/landing.html'
+MAIN_HEADER_PATH = BASE_DIR / 'static/html/main_header.html'
 
-if login_css_path.is_file():  # Check if the file exists
-    with login_css_path.open() as file:
-       login_css = file.read()
-
-if main_css_path.is_file():  # Check if the file exists
-    with main_css_path.open() as file:
-        main_css = file.read()
-        
-if landing_html_path.is_file():
-    with landing_html_path.open() as file:
-        landin_page = file.read()
-
-if main_header_path.is_file():
-    with main_header_path.open() as file:
-        main_header = file.read()
+LOGIN_CSS = load_file_content(LOGIN_CSS_PATH)
+MAIN_CSS = load_file_content(MAIN_CSS_PATH)
+LANDING_PAGE = load_file_content(LANDING_HTML_PATH)
+MAIN_HEADER = load_file_content(MAIN_HEADER_PATH)
 
 def load_user_models(request: gr.Request):
     user = request.session.get('user')
@@ -49,10 +44,10 @@ def update_selection(evt: gr.SelectData, gallery_type: str, width, height):
     if gallery_type == "user":
         selected_lora = {"lora_name": "custom", "trigger_word": "custom"}
     else:
-        selected_lora = lora_models[evt.index]
-    new_placeholder = f"Ingresa un prompt para tu modelo {selected_lora['lora_name']}"
+        selected_lora = LORA_MODELS[evt.index]
+    new_placeholder = f"Enter a prompt for {selected_lora['lora_name']}"
     trigger_word = selected_lora["trigger_word"]
-    updated_text = f"#### Palabra clave: {trigger_word} ✨"
+    updated_text = f"#### Trigger Word: {trigger_word} ✨"
     
     if "aspect" in selected_lora:
         if selected_lora["aspect"] == "portrait":
@@ -64,14 +59,14 @@ def update_selection(evt: gr.SelectData, gallery_type: str, width, height):
 
 def compress_and_train(request: gr.Request, files, model_name, trigger_word, train_steps, lora_rank, batch_size, learning_rate):
     if not files:
-        return "No hay imágenes. Sube algunas imágenes para poder entrenar."
+        return "No Images. Please, upload some images to start training"
     
     user = request.session.get('user')
     
     _, training_credits = get_user_credits(user['id'])
     
     if training_credits <= 0:
-        raise gr.Error("Ya no tienes creditos disponibles. Compra para continuar.")
+        raise gr.Error("You ran out of credtis. Please buy more to continue")
     
     if not user:
         raise gr.Error("User not authenticated. Please log in.")
@@ -111,7 +106,7 @@ def compress_and_train(request: gr.Request, files, model_name, trigger_word, tra
     user['training_credits'] = new_training_credits
     request.session['user'] = user
     
-    return gr.Info("Tu modelo esta entrenando, En unos 20 minutos estará listo para que lo pruebes en 'Generación'."), new_training_credits
+    return gr.Info("Your model is training. In about 20 minutes, it will be ready for you to test in 'Generation"), new_training_credits
             
 def run_lora(request: gr.Request, prompt, cfg_scale, steps, selected_index, selected_gallery, width, height, lora_scale, progress=gr.Progress(track_tqdm=True)):
     user = request.session.get('user')
@@ -179,9 +174,9 @@ def greet(request: gr.Request):
             return f"{greeting}\n"
     return "OBTU AI. Please log in."
 
-with gr.Blocks(theme=gr.themes.Soft(), css=login_css) as login_demo:
+with gr.Blocks(theme=gr.themes.Soft(), css=LOGIN_CSS) as login_demo:
     with gr.Column(elem_id="google-btn-container", elem_classes="google-btn-container svelte-vt1mxs gap"):
-        btn = gr.Button("Iniciar Sesion con Google", elem_classes="login-with-google-btn")
+        btn = gr.Button("Sign In with Google", elem_classes="login-with-google-btn")
     _js_redirect = """
     () => {
         url = '/login' + window.location.search;
@@ -189,16 +184,16 @@ with gr.Blocks(theme=gr.themes.Soft(), css=login_css) as login_demo:
     }
     """
     btn.click(None, js=_js_redirect)
-    gr.HTML(landin_page)
+    gr.HTML(LANDING_PAGE)
         
 
 header = '<script src="https://cdn.lordicon.com/lordicon.js"></script>'
 
-with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
-    title = gr.HTML(main_header)
+with gr.Blocks(theme=gr.themes.Soft(), head=header, css=MAIN_CSS) as main_demo:
+    title = gr.HTML(MAIN_HEADER)
     
     with gr.Column(elem_id="logout-btn-container"):
-        gr.Button("Salir", link="/logout", elem_id="logout_btn")
+        gr.Button("Logout", link="/logout", elem_id="logout_btn")
 
     
     greetings = gr.Markdown("Loading user information...")
@@ -211,17 +206,17 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
         with gr.Column():
             train_credits_display = gr.Number(label="Training Credits", precision=0, interactive=False)
         with gr.Column():
-            gr.Button("Comprar Creditos 💳", link="/buy_credits")
+            gr.Button("Buy Credits 💳", link="/buy_credits")
     
 
     with gr.Tabs():
-        with gr.TabItem('Generacion'):
+        with gr.TabItem('Create'):
             with gr.Row():
                 with gr.Column(scale=3):
                     prompt = gr.Textbox(label="Prompt", 
                                         lines=1, 
-                                        placeholder="Ingresa un prompt para empezar a crear", 
-                                        info='Algunos modelos publicos pueden demorar un poco más dependiendo de la disponibilidad que tengan en los servidores.')
+                                        placeholder="Enter Your Prompt to start creating 📷", 
+                                        info='Some public models may experience longer processing times due to server availability and queue management.')
                 with gr.Column(scale=1, elem_id="gen_column"):
                     generate_button = gr.Button("Generate", variant="primary", elem_id="gen_btn")
             
@@ -230,17 +225,17 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
                     result = gr.Image(label="Imagen Generada")
                 
                 with gr.Column(scale=3):
-                    with gr.Accordion("Modelos Publicos"):
+                    with gr.Accordion("Public Models"):
                         selected_info = gr.Markdown("")
                         gallery = gr.Gallery(
-                            [(item["image_url"], item["model_name"]) for item in lora_models],
-                            label="Galeria de Modelos Publicos",
+                            [(item["image_url"], item["model_name"]) for item in LORA_MODELS],
+                            label="Public Models",
                             allow_preview=False,
                             columns=3,
                             elem_id="gallery"
                         )
                         
-                    with gr.Accordion("Tus Modelos"):
+                    with gr.Accordion("Your Models"):
                         user_model_gallery = gr.Gallery(
                             label="Galeria de Modelos",
                             allow_preview=False,
@@ -250,7 +245,7 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
                         
             gallery_type = gr.State("Public")
 
-            with gr.Accordion("Configuracion Avanzada", open=False):
+            with gr.Accordion("Advanced Settings", open=False):
                 with gr.Row():
                     cfg_scale = gr.Slider(label="CFG Scale", minimum=1, maximum=20, step=0.5, value=3.5)
                     steps = gr.Slider(label="Steps", minimum=1, maximum=50, step=1, value=28)
@@ -279,54 +274,29 @@ with gr.Blocks(theme=gr.themes.Soft(), head=header, css=main_css) as main_demo:
                 outputs=[result, generation_credits_display]
             )
 
-        with gr.TabItem("Training"):
-            gr.Markdown("# Entrena tu propio modelo 🧠")
-            gr.Markdown("En esta seccion podes entrenar tu propio modelo a partir de tus imagenes.")
+        with gr.TabItem("Train"):
+            gr.Markdown("# Train your own model 🧠")
+            gr.Markdown("In this section, you can train your own model using your images.")
             with gr.Row():
                 with gr.Column():
                     train_dataset = gr.Gallery(columns=4, interactive=True, label="Tus Imagenes")
-                    model_name = gr.Textbox(label="Nombre del Modelo",)
-                    trigger_word = gr.Textbox(label="Palabra clave", 
-                                              info="Esta seria una palabra clave para luego indicar al modelo cuando debe usar estas nuevas capacidad es que le vamos a ensenar", 
+                    model_name = gr.Textbox(label="Model Name",)
+                    trigger_word = gr.Textbox(label="Trigger Word", 
+                                              info="This will be a keyword to later instruct the model when to use these new capabilities we're going to teach it", 
                                               )
-                    train_button = gr.Button("Comenzar Training")
-            with gr.Accordion("Configuracion Avanzada", open=False):
+                    train_button = gr.Button("Start Training")
+            with gr.Accordion("Advanced Settings", open=False):
                 train_steps = gr.Slider(label="Training Steps", minimum=100, maximum=10000, step=100, value=1000)
                 lora_rank = gr.Number(label='lora_rank', value=16)
                 batch_size = gr.Number(label='batch_size', value=1)
                 learning_rate = gr.Number(label='learning_rate', value=0.0004)
                 training_status = gr.Textbox(label="Training Status")
-            
-            def fake_train(train_dataset, model_name, trigger_word, train_steps, lora_rank, batch_size, learning_rate):
-                print(f'fake training for test')
-                new_training_credits = 0
-                if new_training_credits <= 0:
-                    raise gr.Error("Ya no tienes creditos disponibles. Compra para continuar.")
-                return gr.Info("Tu modelo esta entrenando, En unos 20 minutos estará listo para que lo pruebes en 'Generación'."), new_training_credits
                 
             train_button.click(
-                #compress_and_train,
-                fake_train,
+                compress_and_train,
                 inputs=[train_dataset, model_name, trigger_word, train_steps, lora_rank, batch_size, learning_rate],
                 outputs=[training_status,train_credits_display]
             )
                 
-                
-        #main_demo.load(greet, None, title)
-        #main_demo.load(greet, None, greetings)
-        #main_demo.load((greet, display_credits), None, [greetings, generation_credits_display, train_credits_display])
         main_demo.load(load_user_models, None, user_model_gallery)
         main_demo.load(load_greet_and_credits, None, [greetings, generation_credits_display, train_credits_display])
-
-
-
-# TODO:
-'''
-- resolver mostrar bien los nombres de los modelos en la galeria
-- Training con creditos.
-- Stripe(?)
-- Mejorar boton de login/logout
-- Retoque landing page
-'''
-
-

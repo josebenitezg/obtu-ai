@@ -105,17 +105,6 @@ async def stripe_webhook(request: Request):
     
     return {"status": "success"}
     
-# @router.get("/success")
-# async def payment_success(request: Request):
-#     print("Payment successful")
-#     user = request.session.get('user')
-#     print(user)
-#     if user:
-#         updated_user = get_user_by_id(user['id'])
-#         if updated_user:
-#             request.session['user'] = updated_user
-#             return RedirectResponse(url='/gradio', status_code=303)
-#     return RedirectResponse(url='/login', status_code=303)
     
 @router.get("/cancel")
 async def payment_cancel(request: Request):
