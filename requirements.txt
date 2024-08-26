@@ -11,3 +11,4 @@ starlette==0.38.2
 stripe==10.8.0
 supabase==2.7.3
 uvicorn==0.30.6
+python-fasthtml
