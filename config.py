@@ -16,6 +16,9 @@ STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 DOMAIN = os.getenv("DOMAIN")
 
+REPLICATE_OWNER = "josebenitezg"
+HF_OWNER = "joselobenitezg"
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
