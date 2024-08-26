@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from config import SECRET_KEY
 from routes import router, get_user
-from gradio_app_og import login_demo, main_demo
+from gradio_app import login_demo, main_demo
 import gradio as gr
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,7 +16,6 @@ main_demo.queue()
 
 static_dir = Path("./static")
 app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")
-#app.mount("/assets", StaticFiles(directory="assets", html=True), name="assets")
 
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, max_age=3600)
 

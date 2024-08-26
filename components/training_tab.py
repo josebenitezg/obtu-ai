@@ -22,7 +22,7 @@ def create_training_tab():
         
         train_button.click(
             compress_and_train,
-            inputs=[gr.Request(), files, model_name, trigger_word, train_steps, lora_rank, batch_size, learning_rate],
+            inputs=[files, model_name, trigger_word, train_steps, lora_rank, batch_size, learning_rate],
             outputs=[output]
         )
 
