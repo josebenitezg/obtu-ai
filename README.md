@@ -1,3 +1,4 @@
+---
 title: Obtu AI
 emoji: 📸
 colorFrom: red
@@ -22,7 +23,7 @@ models:
   - veryVANYA/ps1-style-flux
   - multimodalart/flux-tarot-v1
   - alfredplpl/flux.1-dev-modern-anime-lora
-
+---
 # ObtuAI - AI-Powered Image Generation Platform
 
 ObtuAI is an innovative platform that leverages artificial intelligence to generate and manipulate images based on user prompts and custom models.
