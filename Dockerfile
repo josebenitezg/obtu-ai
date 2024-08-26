@@ -1,9 +1,10 @@
-FROM python:3.8-slim
+FROM python:3.10.9
 
-WORKDIR /usr/src/app
 COPY . .
-RUN pip install --no-cache-dir gradio
-EXPOSE 7860
-ENV GRADIO_SERVER_NAME="0.0.0.0"
 
-CMD ["python", "app.py"]
+WORKDIR /
+
+# Install requirements.txt 
+RUN pip install --no-cache-dir --upgrade -r /requirements.txt
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
