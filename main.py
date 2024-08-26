@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from config import SECRET_KEY
 from routes import router, get_user
-from gradio_app import login_demo, main_demo
+from gradio_app_og import login_demo, main_demo
 import gradio as gr
 from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware

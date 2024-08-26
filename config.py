@@ -4,6 +4,9 @@ import logging
 
 load_dotenv()
 
+REPLICATE_OWNER = "josebenitezg"
+HF_OWNER = "joselobenitezg"
+
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 SECRET_KEY = os.getenv("SECRET_KEY")

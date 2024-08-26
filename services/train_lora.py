@@ -2,14 +2,13 @@ import replicate
 import os
 from huggingface_hub import create_repo
 from database import create_lora_models
-
-REPLICATE_OWNER = "josebenitezg"
+from config import HF_OWNER, REPLICATE_OWNER
 
 def lora_pipeline(user_id, zip_path, model_name, trigger_word="TOK", steps=1000, lora_rank=16, batch_size=1, autocaption=True, learning_rate=0.0004):
     print(f'Creating dataset for {model_name}')
     model_name = model_name.lower().replace(' ', '_')
-    hf_repo_name = f"joselobenitezg/flux-dev-{model_name}"
-    replicate_repo_name = f"josebenitezg/flux-dev-{model_name}"
+    hf_repo_name = f"{HF_OWNER}/flux-dev-{model_name}"
+    replicate_repo_name = f"{REPLICATE_OWNER}/flux-dev-{model_name}"
     create_repo(hf_repo_name, repo_type='model')
 
     lora_name = f"flux-dev-{model_name}"
@@ -45,7 +44,6 @@ def lora_pipeline(user_id, zip_path, model_name, trigger_word="TOK", steps=1000,
         destination=f"{model.owner}/{model.name}"
     )
 
-    print(f"training: {training.keys()}")
     print(f"Training started: {training.status}")
     print(f"Training URL: https://replicate.com/p/{training.id}")
     print(f"Creating model in Database")
